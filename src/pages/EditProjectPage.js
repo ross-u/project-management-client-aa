@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "http://localhost:5005";
@@ -8,43 +8,45 @@ function EditProjectPage(props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { projectId } = useParams();
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
-    axios
-      .get(`${API_URL}/api/projects/${projectId}`)
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/projects/${projectId}`
+        );
         const oneProject = response.data;
         setTitle(oneProject.title);
         setDescription(oneProject.description);
-      })
-      .catch((error) => console.log(error));
-    
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
   }, [projectId]);
-  
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    const requestBody = { title, description };
-
-    axios
-      .put(`${API_URL}/api/projects/${projectId}`, requestBody)
-      .then((response) => {
-        props.history.push(`/projects/${projectId}`)
-      });
+  const handleFormSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const requestBody = { title, description };
+      await axios.put(`${API_URL}/api/projects/${projectId}`, requestBody);
+      navigate(`/projects/${projectId}`);
+    } catch (error) {
+      console.log(error);
+    }
   };
-  
-  
-  const deleteProject = () => {
-    
-    axios
-      .delete(`${API_URL}/api/projects/${projectId}`)
-      .then(() => {
-        props.history.push("/projects");
-      })
-      .catch((err) => console.log(err));
-  };  
 
-  
+  const deleteProject = async () => {
+    try {
+      axios.delete(`${API_URL}/api/projects/${projectId}`);
+      navigate("/projects");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="EditProjectPage">
       <h3>Edit the Project</h3>
@@ -57,7 +59,7 @@ function EditProjectPage(props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        
+
         <label>Description:</label>
         <textarea
           name="description"

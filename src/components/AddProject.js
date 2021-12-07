@@ -3,27 +3,26 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5005";
 
-function AddProject(props) {
+function AddProject({ refreshProjects }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const requestBody = { title, description };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+      await axios.post(`${API_URL}/api/projects`, requestBody);
 
-    const requestBody = { title, description };
-    
-    axios
-      .post(`${API_URL}/api/projects`, requestBody)
-      .then((response) => {
-        // Reset the state
-        setTitle("");
-        setDescription("");
-        props.refreshProjects();
-      })
-      .catch((error) => console.log(error));
+      // Reset the state
+      setTitle("");
+      setDescription("");
+
+      refreshProjects();
+    } catch (error) {
+      console.log(error);
+    }
   };
-
 
   return (
     <div className="AddProject">
